@@ -74,7 +74,7 @@ def layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,N
         val_acc_history.append(test_accuracy)
 
         if t%10 == 0:
-            print('epoch %d/%d: train loss= %f || ,test loss= %f ||,train accracy= %f ||, test accracy= %f ||, learning rate= %f ||' % (t,iterations,train_loss,test_loss,train_accuracy,test_accuracy,lr))
+            print('epoch %d/%d: train loss= %f || ,test loss= %f ||,train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||' % (t,iterations,train_loss,test_loss,train_accuracy,test_accuracy,lr))
 
         # Backward pass
         dy_pred=(1./batch_size)*2.0*(y_pred-y)#partial deravative of L w.r.t y_pred
