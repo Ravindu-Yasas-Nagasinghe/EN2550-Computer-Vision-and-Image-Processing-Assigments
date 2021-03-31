@@ -97,7 +97,7 @@ def layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,N
 iterations = 300#gradient descent iterations
 lr = 1.4e-2#learning rate
 lr_decay= 0.999
-reg = 5e-6 #lambda=regularization constant of the loss function
+reg = 5e-6 #lambda=regularization parameter
 x_train,y_train,x_test,y_test,K,Din,Ntr,Nte=preprocessing(normalize=True,reshape=True)
  #Run the linear classifier
 w1,b1,loss_history,loss_history_test,train_acc_history,val_acc_history,lr_array=layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,Ntr,Nte)
@@ -179,6 +179,7 @@ def layer_2(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
             % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
 
         # Backward propagation
+        #let's find the deravatives of the learnable parameters
         dy_pred=(1./batch_size)*2.0*(y_pred-y)#partial deravative of L w.r.t y_pred
         dw2=h.T.dot(dy_pred)+reg*w2
         db2=dy_pred.sum(axis=0)
@@ -199,7 +200,7 @@ x_train_2layer,y_train_2layer,x_test_2layer,y_test_2layer,K,Din,Ntr,Nte=preproce
 iterations = 300#gradient descent iterations
 lr = 1.4e-2#learning rate
 lr_decay= 0.999
-reg = 5e-6#lambda
+reg = 5e-6#lambda=regularization parameter
 H=200 #hidden layer nodes  
 w1_2layer,b1_2layer,w2_2layer,b2_2layer,loss_history_2layer,loss_history_test_2layer,train_acc_history_2layer,val_acc_history_2layer,lr_array_2layer=layer_2(x_train_2layer,y_train_2layer,x_test_2layer,y_test_2layer,Din,lr,lr_decay,H,reg,K,Ntr,Nte)
 
@@ -229,6 +230,5 @@ for i in range(2):
         ax[i,j].set_yticks([])
         ax[i,j].set_title(classes[i*5+j])
 plt.show()
-
 
 #part3
