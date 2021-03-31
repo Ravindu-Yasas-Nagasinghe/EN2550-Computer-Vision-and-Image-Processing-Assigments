@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import cv2 as cv
 
 # Defining function for data preprocessing
-def preprocessing():
+def preprocessing(normalize,reshape):
     # Importing data set CIFAR-10
     (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
 
@@ -14,8 +14,8 @@ def preprocessing():
     Nte = x_test.shape[0] # Number of testing data
     Din = 3072 # CIFAR10 = 3072 = 32x32x3
 
-    x_train, x_test = x_train / 255.0, x_test / 255.0# Normalize pixel values
-
+    if normalize:
+        x_train, x_test = x_train / 255.0, x_test / 255.0# Normalize pixel values
     # Center the pixel values
     mean_image = np.mean(x_train, axis=0)
     x_train = x_train - mean_image
@@ -24,9 +24,9 @@ def preprocessing():
     y_test = tf.keras.utils.to_categorical(y_test, num_classes=K)
 
     #flatterning the input images and changing the data type
-    
-    x_train = np.reshape(x_train,(Ntr,Din))
-    x_test = np.reshape(x_test,(Nte,Din))
+    if reshape:
+        x_train = np.reshape(x_train,(Ntr,Din))
+        x_test = np.reshape(x_test,(Nte,Din))
     
     x_train = x_train.astype('float32')
     x_test = x_test.astype('float32')
@@ -94,7 +94,7 @@ iterations = 300#gradient descent iterations
 lr = 1.4e-2#learning rate
 lr_decay= 0.999
 reg = 5e-6 #lamda(regularization constant for the loss function)
-x_train,y_train,x_test,y_test,K,Din,Ntr,Nte=preprocessing()
+x_train,y_train,x_test,y_test,K,Din,Ntr,Nte=preprocessing(normalize=True,reshape=True)
 w1,b1,loss_history,loss_history_test,train_acc_history,val_acc_history,lr_array=layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,Ntr,Nte)
 
 # ploting the graphs of trining and testing losses, training and testing accuracies and learning rate
