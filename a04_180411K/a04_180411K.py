@@ -67,10 +67,10 @@ def layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,N
         loss_history_testing.append(test_loss)
         
         # calculating trainning and testing accuracies
-        train_accuracy=1-(1/(batch_size*K))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
+        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y_train,axis=1)-np.argmax(y_pred,axis=1))).sum()
         train_acc_history.append(train_accuracy)
 
-        test_accuracy=1-(1/(batch_size*K))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
+        test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
         val_acc_history.append(test_accuracy)
 
         if t%10 == 0:
