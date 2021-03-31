@@ -20,8 +20,6 @@ def preprocessing():
     mean_image = np.mean(x_train, axis=0)
     x_train = x_train - mean_image
     x_test = x_test - mean_image
-
-    # One hot encoding the labels
     y_train = tf.keras.utils.to_categorical(y_train, num_classes=K)
     y_test = tf.keras.utils.to_categorical(y_test, num_classes=K)
 
@@ -105,9 +103,10 @@ titles = {"Training Loss":loss_history, "testing loss":loss_history_test,"Traini
          "testing Accuracy": val_acc_history, "Learning Rate":lr_array}
 place = 1
 for key in titles.keys():
-    plt.subplot(1,5,place);plt.plot(titles[key], linewidth=2)
+    axes[0,places].plot(titles[key])
     plt.title(key)
     place+=1
+    xlabel='epoch'
 plt.show()
 #plotting the weight matrix W as 10 images
 images=[]
