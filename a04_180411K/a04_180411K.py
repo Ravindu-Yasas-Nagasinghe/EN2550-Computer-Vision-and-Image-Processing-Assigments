@@ -98,15 +98,14 @@ x_train,y_train,x_test,y_test,K,Din,Ntr,Nte=preprocessing()
 w1,b1,loss_history,loss_history_test,train_acc_history,val_acc_history,lr_array=layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,Ntr,Nte)
 
 # ploting the graphs of trining and testing losses, training and testing accuracies and learning rate
-fig, axes  = plt.subplots(1,5, sharex='all', sharey='all', figsize=(30,10))
+fig, axes  = plt.subplots(1,5)
 titles = {"Training Loss":loss_history, "testing loss":loss_history_test,"Training Accuracy":train_acc_history,
          "testing Accuracy": val_acc_history, "Learning Rate":lr_array}
-place = 1
+place = 0
 for key in titles.keys():
-    axes[0,places].plot(titles[key])
-    plt.title(key)
+    axes[place].plot(titles[key])
+    axes[place].set_title(key)
     place+=1
-    xlabel='epoch'
 plt.show()
 #plotting the weight matrix W as 10 images
 images=[]
