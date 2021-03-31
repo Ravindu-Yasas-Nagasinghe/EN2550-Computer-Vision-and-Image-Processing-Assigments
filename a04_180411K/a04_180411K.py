@@ -93,7 +93,7 @@ def layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,N
 iterations = 300#gradient descent iterations
 lr = 1.4e-2#learning rate
 lr_decay= 0.999
-reg = 5e-6 #lamda(regularization constant for the loss function)
+reg = 5e-6 #lambda=regularization constant of the loss function
 x_train,y_train,x_test,y_test,K,Din,Ntr,Nte=preprocessing(normalize=True,reshape=True)
 w1,b1,loss_history,loss_history_test,train_acc_history,val_acc_history,lr_array=layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,Ntr,Nte)
 
