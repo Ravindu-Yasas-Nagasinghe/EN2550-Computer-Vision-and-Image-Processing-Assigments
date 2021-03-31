@@ -179,7 +179,7 @@ def layer_2(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
             % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
 
         # Backward propagation
-        dy_pred=(1./batch_size)*2.0*(y_pred-y)
+        dy_pred=(1./batch_size)*2.0*(y_pred-y)#partial deravative of L w.r.t y_pred
         dw2=h.T.dot(dy_pred)+reg*w2
         db2=dy_pred.sum(axis=0)
         dh=dy_pred.dot(w2.T)
