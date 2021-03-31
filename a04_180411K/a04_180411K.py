@@ -70,7 +70,7 @@ def layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,N
         loss_history_testing.append(test_loss)
         
         # calculating trainning and testing accuracies
-        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y_train,axis=1)-np.argmax(y_pred,axis=1))).sum()
+        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
         train_acc_history.append(train_accuracy)
 
         test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
@@ -168,7 +168,7 @@ def layer_2(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
         loss_history_test.append(testing_loss)
         
         # calculating trainning and testing accuracies
-        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y_train,axis=1)-np.argmax(y_pred,axis=1))).sum()
+        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
         train_acc_history.append(train_accuracy)
 
         test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
@@ -231,4 +231,100 @@ for i in range(2):
         ax[i,j].set_title(classes[i*5+j])
 plt.show()
 
-#part3
+
+#part 3
+
+# Function for two layer dense network with stochastic gradient descent
+def mini_batching(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
+    loss_history = []
+    loss_history_test = []
+    train_acc_history = []
+    val_acc_history = []
+    lr_array =[]
+    seed = 0
+    rng = np.random.default_rng(seed=seed)
+    batch_size=500 #make batch size =500 for stochastic gradient descent
+
+    std=1e-5
+    #initializing weight and bias matrices for hidden layer
+    w1 = std*np.random.randn(Din, H)
+    b1 = np.zeros(H)
+    #initializing weight and bias matrices for final layer
+    w2 = std*np.random.randn(H, K)
+    b2 = np.zeros(K)
+
+    for t in range(iterations):
+        indices = np.random.choice(Ntr,batch_size)
+        
+        rng.shuffle(indices)# To avoid overfitting shuffle the training data set
+        x=x_train[indices]
+        y=y_train[indices]
+
+        #forward propagation
+        h=1/(1+np.exp(-(x.dot(w1)+b1)))
+        h_test=1/(1+np.exp(-((x_test).dot(w1)+b1)))
+        y_pred=h.dot(w2)+b2
+        y_pred_test=h_test.dot(w2)+b2
+
+        # calculating the training and testing loss
+        training_loss=(1/batch_size)*(np.square(y_pred-y)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
+        testing_loss=(1/batch_size)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
+        loss_history.append(training_loss)
+        loss_history_test.append(testing_loss)
+        # calculating trainning and testing accuracies
+        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
+        train_acc_history.append(train_accuracy)
+
+        test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
+        val_acc_history.append(test_accuracy)
+        # Print for every 10 iterations
+        if t%10 == 0:
+            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||' 
+            % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
+
+        # Backward propagation
+        #let's find the deravatives of the learnable parameters
+        dy_pred=(1./batch_size)*2.0*(y_pred-y)#partial deravative of L w.r.t y_pred
+        dw2=h.T.dot(dy_pred)+reg*w2
+        db2=dy_pred.sum(axis=0)
+        dh=dy_pred.dot(w2.T)
+        dw1=x.T.dot(dh*h*(1-h))+reg*w1
+        db1=(dh*h*(1-h)).sum(axis=0)
+        #update weight matrices
+        w1-=lr*dw1 
+        w2-=lr*dw2
+        #update bias matrices
+        b1-=lr*db1
+        b2-=lr*db2
+        lr_array.append(lr)
+        lr*=lr_decay#decaying the learning rate
+    return w1,b1,w2,b2,loss_history,loss_history_test,train_acc_history,val_acc_history,lr_array
+
+
+batch_size = 500
+H=200#hidden layer nodes  
+iterations = 300#gradient descent iterations
+lr = 1.4e-2
+lr_decay= 0.999
+reg = 5e-6#lambda=regularization parameter
+x_train_2layer,y_train_2layer,x_test_2layer,y_test_2layer,K,Din,Ntr,Nte=preprocessing(normalize=False,reshape=True)
+#Remove the normalization. Otherwise the model will not learn 
+w1_batching,b1_batching,w2_batching,b2_batching,loss_history_batching,loss_history_test_batching,train_acc_history_batching,val_acc_history_batching,lr_array_batching=mini_batching(x_train_2layer,y_train_2layer,x_test_2layer,y_test_2layer,Din,lr,lr_decay,H,reg,K,Ntr,Nte)
+
+# ploting the graphs of training and testing losses, training and testing accuracies and learning rate
+fig, axes  = plt.subplots(1,5,figsize=(50,10))
+titles = {"Training Loss":[loss_history_2layer,loss_history_batching], "testing loss":[loss_history_test_2layer,loss_history_test_batching],
+"Training Accuracy":[train_acc_history_2layer,train_acc_history_batching], "testing Accuracy": [val_acc_history_2layer,val_acc_history_batching], 
+"Learning Rate":[lr_array_2layer,lr_array_batching]}
+place = 0
+for key in titles.keys():
+    axes[place].plot(titles[key[0]],label='with gradient descent')
+    axes[place].plot(titles[key[1]],label='with stochastic gradient descent')
+    axes[place].legend()
+    axes[place].set_xlabel("epoch")
+    axes[place].set_title(key)
+    place+=1
+plt.show()
+
+#part 4
+
