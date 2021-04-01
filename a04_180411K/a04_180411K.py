@@ -327,4 +327,44 @@ for key in titles.keys():
 plt.show()
 
 #part 4
+#CNN
+from tensorflow.keras import layers,models,optimizers
+x_train_CNN,y_train_CNN,x_test_CNN,y_test_CNN,K,Din,Ntr,Nte=preprocessing(normalize=True,reshape=False)
+model = models.Sequential()
+#layers
+model.add(layers.Conv2D(32,(3,3),activation='relu',input_shape=(32,32,3)))
+model.add(layers.MaxPool2D((2,2)))
+model.add(layers.Conv2D(64,(3,3),activation='relu'))
+model.add(layers.MaxPool2D((2,2)))
+model.add(layers.Conv2D(64,(3,3),activation='relu'))
+model.add(layers.MaxPool2D((2,2)))
+model.add(layers.Flatten())
+model.add(layers.Dense(64,activation='relu'))
+model.add(layers.Dense(10))
 
+sgd = keras.optimizers.SGD(lr=1.4e-2, momentum=0.9, decay=1e-6)#lr =learning rate, decay =learning rate decay
+model.compile(optimizer=sgd,loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),metrics=["accuracy"])
+print(model.summary())
+history=model.fit(x_train_CNN,y_train_CNN,epochs=50,batch_size=50,validation_data=(x_test_CNN,y_test_CNN))
+
+print(model.optimizer.get_config())
+plt.plot(history.history['loss'],label='training loss')#plotting the graphs
+plt.xlabel('epoch')
+plt.legend(loc='lower right')
+plt.xlim([0,50])
+plt.show()
+plt.plot(history.history['val_loss'],label='testing loss')
+plt.xlabel('epoch')
+plt.legend(loc='lower right')
+plt.xlim([0,50])
+plt.show()
+plt.plot(history.history['accuracy'],label='training accuracy')
+plt.xlabel('epoch')
+plt.legend(loc='lower right')
+plt.xlim([0,50])
+plt.show()
+plt.plot(history.history['val_accuracy'],label='testing accuracy')
+plt.xlabel('epoch')
+plt.legend(loc='lower right')
+plt.xlim([0,50])
+plt.show()
