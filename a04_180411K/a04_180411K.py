@@ -3,7 +3,6 @@ from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2 as cv
-from tensorflow.keras import layers,models
 
 
 # Defining function for data preprocessing
@@ -62,15 +61,15 @@ def layer1LinearClassifier(x_train,y_train,x_test,y_test,K,Din,lr,lr_decay,reg,N
         # forward propagation
         y_pred=x.dot(w1)+b1
         y_pred_test=x_test.dot(w1)+b1
-
+        val=y_pred_test.shape[0]
         # calculating loss using regularized loss function
         train_loss=(1/batch_size)*(np.square(y_pred-y)).sum()+reg*(np.sum(w1*w1))
         loss_history.append(train_loss)
-        test_loss=(1/batch_size)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1))
+        test_loss=(1/val)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1))
         loss_history_testing.append(test_loss)
         
         # calculating trainning and testing accuracies
-        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
+        train_accuracy=1-(1/(10*batch_size))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
         train_acc_history.append(train_accuracy)
 
         test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
@@ -160,23 +159,22 @@ def layer_2(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
         h_test=1/(1+np.exp(-((x_test).dot(w1)+b1)))
         y_pred=h.dot(w2)+b2
         y_pred_test=h_test.dot(w2)+b2
-
+        val=y_pred_test.shape[0]
         # calculating the training and testing loss
         training_loss=(1/batch_size)*(np.square(y_pred-y)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
-        testing_loss=(1/batch_size)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
         loss_history.append(training_loss)
+        testing_loss=(1/val)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
         loss_history_test.append(testing_loss)
         
         # calculating trainning and testing accuracies
-        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
+        train_accuracy=1-(1/(10*batch_size))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
         train_acc_history.append(train_accuracy)
 
         test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
         val_acc_history.append(test_accuracy)
         # Print for every 10 iterations
         if t%10 == 0:
-            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||' 
-            % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
+            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||' % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
 
         # Backward propagation
         #let's find the deravatives of the learnable parameters
@@ -231,7 +229,6 @@ for i in range(2):
         ax[i,j].set_title(classes[i*5+j])
 plt.show()
 
-
 #part 3
 
 # Function for two layer dense network with stochastic gradient descent
@@ -262,25 +259,24 @@ def mini_batching(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte)
 
         #forward propagation
         h=1/(1+np.exp(-(x.dot(w1)+b1)))
-        h_test=1/(1+np.exp(-((x_test).dot(w1)+b1)))
         y_pred=h.dot(w2)+b2
+        h_test=1/(1+np.exp(-((x_test).dot(w1)+b1)))
         y_pred_test=h_test.dot(w2)+b2
-
+        val=y_pred_test.shape[0]
         # calculating the training and testing loss
         training_loss=(1/batch_size)*(np.square(y_pred-y)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
-        testing_loss=(1/batch_size)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
         loss_history.append(training_loss)
+        testing_loss=(1/val)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
         loss_history_test.append(testing_loss)
         # calculating trainning and testing accuracies
-        train_accuracy=1-(1/(10*Ntr))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
+        train_accuracy=1-(1/(10*batch_size))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
         train_acc_history.append(train_accuracy)
 
         test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
         val_acc_history.append(test_accuracy)
         # Print for every 10 iterations
         if t%10 == 0:
-            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||' 
-            % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
+            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||'  % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
 
         # Backward propagation
         #let's find the deravatives of the learnable parameters
@@ -318,9 +314,13 @@ titles = {"Training Loss":[loss_history_2layer,loss_history_batching], "testing 
 "Learning Rate":[lr_array_2layer,lr_array_batching]}
 place = 0
 for key in titles.keys():
-    axes[place].plot(titles[key[0]],label='with gradient descent')
-    axes[place].plot(titles[key[1]],label='with stochastic gradient descent')
-    axes[place].legend()
+    if place==0:
+        axes[place].plot(titles[key][0],label='with gradient descent')
+        axes[place].plot(titles[key][1],label='with stochastic gradient descent')
+        axes[place].legend()
+    else:
+        axes[place].plot(titles[key][0])
+        axes[place].plot(titles[key][1])
     axes[place].set_xlabel("epoch")
     axes[place].set_title(key)
     place+=1
