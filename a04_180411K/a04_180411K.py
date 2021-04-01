@@ -321,7 +321,7 @@ for key in titles.keys():
     else:
         axes[place].plot(titles[key][0])
         axes[place].plot(titles[key][1])
-    axes[place].set_xlabel("epoch")
+    axes[place].set_xlabel("iteration")
     axes[place].set_title(key)
     place+=1
 plt.show()
