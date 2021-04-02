@@ -127,7 +127,7 @@ for i in range(2):
         ax[i,j].set_title(classes[i*5+j])
 plt.show()
 
-
+#part 2
 # Function for two layer dense network
 def layer_2(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
     loss_history = []
@@ -148,7 +148,7 @@ def layer_2(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
     b2 = np.zeros(K)
 
     for t in range(iterations):
-        indices = np.random.choice(Ntr,batch_size)
+        indices = np.arange(Ntr)
         
         rng.shuffle(indices)# To avoid overfitting shuffle the training data set
         x=x_train[indices]
@@ -174,7 +174,8 @@ def layer_2(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte):
         val_acc_history.append(test_accuracy)
         # Print for every 10 iterations
         if t%10 == 0:
-            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||' % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
+            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||' 
+            % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
 
         # Backward propagation
         #let's find the deravatives of the learnable parameters
@@ -251,49 +252,65 @@ def mini_batching(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte)
     b2 = np.zeros(K)
 
     for t in range(iterations):
-        indices = np.random.choice(Ntr,batch_size)
+        training_loss = 0
+        train_accuracy=0
+        test_accuracy=0
+        testing_loss=0
+        for begin in range(0,Ntr,batch_size):
+            indices = np.arange(Ntr)
+            indices=indices[begin:begin+batch_size]
+            rng.shuffle(indices)# To avoid overfitting shuffle the training data set
+            x=x_train[indices]
+            y=y_train[indices]
+            #forward propagation
+            h=1/(1+np.exp(-(x.dot(w1)+b1)))
+            y_pred=h.dot(w2)+b2
+            h_test=1/(1+np.exp(-((x_test).dot(w1)+b1)))
+            y_pred_test=h_test.dot(w2)+b2
+            val=y_pred_test.shape[0]
+            # calculating the training and testing loss
+            mini_training_loss=(1/batch_size)*(np.square(y_pred-y)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
+            mini_testing_loss=(1/val)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
+            training_loss+= mini_training_loss
+            testing_loss+= mini_testing_loss
+
+            # calculating trainning and testing accuracies
+            mini_train_accuracy=1-(1/(10*batch_size))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
+            mini_test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
+            train_accuracy+=mini_train_accuracy
+            test_accuracy+=mini_test_accuracy
+            
+            # Backward propagation
+            #let's find the deravatives of the learnable parameters
+            dy_pred=(1./batch_size)*2.0*(y_pred-y)#partial deravative of L w.r.t y_pred
+            dw2=h.T.dot(dy_pred)+reg*w2
+            db2=dy_pred.sum(axis=0)
+            dh=dy_pred.dot(w2.T)
+            dw1=x.T.dot(dh*h*(1-h))+reg*w1
+            db1=(dh*h*(1-h)).sum(axis=0)
+            #update weight matrices
+            w1-=lr*dw1 
+            w2-=lr*dw2
+            #update bias matrices
+            b1-=lr*db1
+            b2-=lr*db2
+
+        train_accuracy=train_accuracy/(Ntr/batch_size)
+        test_accuracy=(test_accuracy/(Ntr/batch_size))
         
-        rng.shuffle(indices)# To avoid overfitting shuffle the training data set
-        x=x_train[indices]
-        y=y_train[indices]
+        training_loss=training_loss/(Ntr/batch_size)
+        testing_loss=testing_loss/(Ntr/batch_size)
 
-        #forward propagation
-        h=1/(1+np.exp(-(x.dot(w1)+b1)))
-        y_pred=h.dot(w2)+b2
-        h_test=1/(1+np.exp(-((x_test).dot(w1)+b1)))
-        y_pred_test=h_test.dot(w2)+b2
-        val=y_pred_test.shape[0]
-        # calculating the training and testing loss
-        training_loss=(1/batch_size)*(np.square(y_pred-y)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
         loss_history.append(training_loss)
-        testing_loss=(1/val)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
         loss_history_test.append(testing_loss)
-        # calculating trainning and testing accuracies
-        train_accuracy=1-(1/(10*batch_size))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
         train_acc_history.append(train_accuracy)
-
-        test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
         val_acc_history.append(test_accuracy)
-        # Print for every 10 iterations
-        if t%10 == 0:
-            print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||'  % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
-
-        # Backward propagation
-        #let's find the deravatives of the learnable parameters
-        dy_pred=(1./batch_size)*2.0*(y_pred-y)#partial deravative of L w.r.t y_pred
-        dw2=h.T.dot(dy_pred)+reg*w2
-        db2=dy_pred.sum(axis=0)
-        dh=dy_pred.dot(w2.T)
-        dw1=x.T.dot(dh*h*(1-h))+reg*w1
-        db1=(dh*h*(1-h)).sum(axis=0)
-        #update weight matrices
-        w1-=lr*dw1 
-        w2-=lr*dw2
-        #update bias matrices
-        b1-=lr*db1
-        b2-=lr*db2
         lr_array.append(lr)
         lr*=lr_decay#decaying the learning rate
+        # Print for every 10 iterations
+        if t%1 == 0:
+                print('epoch %d/%d: loss= %f || , test loss= %f ||, train accuracy= %f ||, test accuracy= %f ||, learning rate= %f ||'  
+                % (t,iterations,training_loss,testing_loss,train_accuracy,test_accuracy,lr))
     return w1,b1,w2,b2,loss_history,loss_history_test,train_acc_history,val_acc_history,lr_array
 
 
@@ -326,8 +343,9 @@ for key in titles.keys():
     place+=1
 plt.show()
 
+
+
 #part 4
-#CNN
 from tensorflow.keras import layers,models,optimizers
 x_train_CNN,y_train_CNN,x_test_CNN,y_test_CNN,K,Din,Ntr,Nte=preprocessing(normalize=True,reshape=False)
 model = models.Sequential()
