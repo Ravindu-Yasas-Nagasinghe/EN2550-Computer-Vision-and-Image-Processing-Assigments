@@ -252,13 +252,13 @@ def mini_batching(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte)
     b2 = np.zeros(K)
 
     for t in range(iterations):
-        training_loss = 0
-        train_accuracy=0
-        test_accuracy=0
+        training_loss = 0#making training loss, testing loss =0 for next epoch
         testing_loss=0
-        for begin in range(0,Ntr,batch_size):
+        train_accuracy=0#making training accuracy, testing accuracy =0 for next epoch
+        test_accuracy=0
+        for begin in range(0,Ntr,batch_size):#running 100 groups for each epoch 
             indices = np.arange(Ntr)
-            indices=indices[begin:begin+batch_size]
+            indices=indices[begin:begin+batch_size]#taking only 500 samples
             rng.shuffle(indices)# To avoid overfitting shuffle the training data set
             x=x_train[indices]
             y=y_train[indices]
@@ -268,17 +268,17 @@ def mini_batching(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte)
             h_test=1/(1+np.exp(-((x_test).dot(w1)+b1)))
             y_pred_test=h_test.dot(w2)+b2
             val=y_pred_test.shape[0]
-            # calculating the training and testing loss
+            # calculating the training and testing loss for each mini batch
             mini_training_loss=(1/batch_size)*(np.square(y_pred-y)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
             mini_testing_loss=(1/val)*(np.square(y_pred_test-y_test)).sum()+reg*(np.sum(w1*w1)+np.sum(w2*w2))
-            training_loss+= mini_training_loss
-            testing_loss+= mini_testing_loss
+            training_loss+= mini_training_loss#updating training loss for each epoch
+            testing_loss+= mini_testing_loss#updating testing loss for each epoch
 
-            # calculating trainning and testing accuracies
+            # calculating trainning and testing accuracies for each mini batch
             mini_train_accuracy=1-(1/(10*batch_size))*(np.abs(np.argmax(y,axis=1)-np.argmax(y_pred,axis=1))).sum()
             mini_test_accuracy=1-(1/(10*Nte))*(np.abs(np.argmax(y_test,axis=1)-np.argmax(y_pred_test,axis=1))).sum()
-            train_accuracy+=mini_train_accuracy
-            test_accuracy+=mini_test_accuracy
+            train_accuracy+=mini_train_accuracy#updating training accuracy for each epoch
+            test_accuracy+=mini_test_accuracy#updating testing accuracy for each epoch
             
             # Backward propagation
             #let's find the deravatives of the learnable parameters
@@ -294,10 +294,10 @@ def mini_batching(x_train,y_train,x_test,y_test,Din,lr,lr_decay,H,reg,K,Ntr,Nte)
             #update bias matrices
             b1-=lr*db1
             b2-=lr*db2
-
+        #taking average of 100 groups to find
         train_accuracy=train_accuracy/(Ntr/batch_size)
         test_accuracy=(test_accuracy/(Ntr/batch_size))
-        
+        #taking average of 100 groups to find loss
         training_loss=training_loss/(Ntr/batch_size)
         testing_loss=testing_loss/(Ntr/batch_size)
 
